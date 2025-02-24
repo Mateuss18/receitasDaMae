@@ -1,102 +1,145 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
+    <MainHeader />
+
+    <div class="criarReceita">
+      <form @submit.prevent="addNewRecipe">
+        <h2>Criar nova receita</h2>
+
+        <label for="nome">Nome da receita</label> <br />
+        <input
+          v-model="recipeName"
+          type="text"
+          name="nome"
+          id="nome"
+          placeholder="Adicione o nome da receita"
+          required
         />
 
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
+        <br />
 
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
-    </q-header>
-
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
+        <label for="descricao">Descrição</label> <br />
+        <input
+          v-model="recipeDescription"
+          type="text"
+          name="descricao"
+          id="descricao"
+          placeholder="Fale um pouco sobre a receita"
+          required
         />
-      </q-list>
-    </q-drawer>
+        <br />
 
-    <q-page-container>
-      <router-view />
-    </q-page-container>
+        <label for="ingredientes">Ingredientes</label> <br />
+        <input
+          v-model="recipeIngredients"
+          type="text"
+          name="ingredientes"
+          id="ingredientes"
+          placeholder="Insira os ingredientes"
+          required
+        />
+        <br />
+        <br />
+        <button type="submit">Adicionar receita</button>
+      </form>
+    </div>
+
+    <div class="receitas" v-if="dataRecipes.length > 0">
+      <h2>Receitas</h2>
+      <div v-for="recipeItem in dataRecipes" :key="recipeItem.id" class="receita">
+        <p>Nome: {{ recipeItem.name }}</p>
+        <br />
+        <p>Descrição: {{ recipeItem.description }}</p>
+        <br />
+        <p>Ingredientes: {{ recipeItem.ingredients }}</p>
+
+        <button @click="deleteRecipe(recipeItem.id)">Excluir</button>
+      </div>
+    </div>
   </q-layout>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
+import MainHeader from 'src/components/MainHeader.vue'
+import { onMounted, ref, watch } from 'vue'
 
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
+let recipeName = ref(null)
+let recipeDescription = ref(null)
+let recipeIngredients = ref(null)
+let dataRecipes = ref([])
+
+function validatedInputs() {
+  if (recipeName.value !== '' || recipeDescription.value !== '' || recipeIngredients.value !== '') {
+    return true
+  } else {
+    return false
   }
-]
-
-const leftDrawerOpen = ref(false)
-
-function toggleLeftDrawer () {
-  leftDrawerOpen.value = !leftDrawerOpen.value
 }
+
+function addNewRecipe() {
+  if (validatedInputs) {
+    dataRecipes.value.push({
+      id: dataRecipes.value.length + 1,
+      name: recipeName.value,
+      description: recipeDescription.value,
+      ingredients: recipeIngredients.value,
+    })
+
+    recipeName.value = ''
+    recipeDescription.value = ''
+    recipeIngredients.value = ''
+  }
+}
+
+function deleteRecipe(id) {
+  dataRecipes.value = dataRecipes.value.filter((recipe) => recipe.id !== id)
+}
+
+watch(
+  dataRecipes,
+  (newRecipe) => {
+    localStorage.setItem('Receitas', JSON.stringify(newRecipe))
+  },
+  { deep: true },
+)
+
+onMounted(() => {
+  const dataRecipeJSON = localStorage.getItem('Receitas')
+
+  if (dataRecipeJSON) {
+    dataRecipes.value = JSON.parse(dataRecipeJSON)
+  }
+})
 </script>
+
+<style lang="scss">
+header {
+  background-color: $primary;
+}
+header h1 {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: normal;
+  color: #fff;
+}
+h2 {
+  font-size: 22px;
+  line-height: normal;
+  padding: 20px 0;
+  margin: 0;
+}
+.receitas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+.receita {
+  padding: 10px;
+  background-color: #000000;
+  color: #fff;
+}
+.receita p {
+  margin: 0;
+}
+</style>
