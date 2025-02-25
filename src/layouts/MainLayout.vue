@@ -3,7 +3,7 @@
     <MainHeader />
 
     <div class="criarReceita">
-      <form @submit.prevent="addNewRecipe">
+      <form @submit.prevent="addRecipe">
         <h2>Criar nova receita</h2>
 
         <label for="nome">Nome da receita</label> <br />
@@ -27,31 +27,44 @@
           placeholder="Fale um pouco sobre a receita"
           required
         />
+
         <br />
 
         <label for="ingredientes">Ingredientes</label> <br />
-        <input
-          v-model="recipeIngredients"
-          type="text"
-          name="ingredientes"
-          id="ingredientes"
-          placeholder="Insira os ingredientes"
-          required
-        />
+        <div v-for="recipeIngredient in recipeIngredients" :key="recipeIngredient.id">
+          <input
+            v-model="recipeIngredient.name"
+            type="text"
+            name="ingredientes"
+            id="ingredientes"
+            placeholder="Insira o ingrediente"
+            required
+          />
+          <button
+            v-if="recipeIngredients.indexOf(recipeIngredient) >= 1"
+            @click.prevent="removeIngredient(recipeIngredient.id)"
+          >
+            remover
+          </button>
+        </div>
+        <button @click.prevent="addIngredient()">Novo Ingrediente</button>
         <br />
         <br />
-        <button type="submit">Adicionar receita</button>
+        <button type="submit" class="adicionarIngrediente">Adicionar receita</button>
       </form>
     </div>
 
     <div class="receitas" v-if="dataRecipes.length > 0">
       <h2>Receitas</h2>
+
       <div v-for="recipeItem in dataRecipes" :key="recipeItem.id" class="receita">
         <p>Nome: {{ recipeItem.name }}</p>
         <br />
         <p>Descrição: {{ recipeItem.description }}</p>
         <br />
-        <p>Ingredientes: {{ recipeItem.ingredients }}</p>
+        <p>
+          Ingredientes: {{ recipeItem.ingredients.map((ingredient) => ingredient.name).join(', ') }}
+        </p>
 
         <button @click="deleteRecipe(recipeItem.id)">Excluir</button>
       </div>
@@ -65,21 +78,34 @@ import { onMounted, ref, watch } from 'vue'
 
 let recipeName = ref(null)
 let recipeDescription = ref(null)
-let recipeIngredients = ref(null)
+let recipeIngredients = ref([{ id: Date.now(), name: '' }])
 let dataRecipes = ref([])
 
+function addIngredient() {
+  recipeIngredients.value.push({
+    id: Date.now(),
+    name: '',
+  })
+}
+function removeIngredient(id) {
+  recipeIngredients.value = recipeIngredients.value.filter((ingredient) => ingredient.id !== id)
+}
+
 function validatedInputs() {
-  if (recipeName.value !== '' || recipeDescription.value !== '' || recipeIngredients.value !== '') {
+  if (
+    recipeName.value.trim() !== '' &&
+    recipeDescription.value.trim() !== '' &&
+    recipeIngredients.value.some((ingredint) => ingredint.name.trim() !== '')
+  ) {
     return true
   } else {
     return false
   }
 }
-
-function addNewRecipe() {
+function addRecipe() {
   if (validatedInputs) {
     dataRecipes.value.push({
-      id: dataRecipes.value.length + 1,
+      id: Date.now(),
       name: recipeName.value,
       description: recipeDescription.value,
       ingredients: recipeIngredients.value,
@@ -87,18 +113,25 @@ function addNewRecipe() {
 
     recipeName.value = ''
     recipeDescription.value = ''
-    recipeIngredients.value = ''
+    recipeIngredients.value = []
+    recipeIngredients.value.push({
+      id: Date.now(),
+      name: '',
+    })
   }
 }
-
 function deleteRecipe(id) {
   dataRecipes.value = dataRecipes.value.filter((recipe) => recipe.id !== id)
 }
 
 watch(
   dataRecipes,
-  (newRecipe) => {
-    localStorage.setItem('Receitas', JSON.stringify(newRecipe))
+  (newVal) => {
+    try {
+      localStorage.setItem('Receitas', JSON.stringify(newVal))
+    } catch (error) {
+      console.error('Erro ao acessar localStorage: ', error)
+    }
   },
   { deep: true },
 )
@@ -113,6 +146,23 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
+label {
+  display: flex;
+  font-size: 28px;
+  margin-top: 12px;
+}
+input {
+  height: 60px;
+  width: 400px;
+  font-size: 22px;
+}
+button {
+  font-size: 22px;
+  font-weight: 500;
+  background-color: pink;
+  height: 40px;
+  margin-top: 10px;
+}
 header {
   background-color: $primary;
 }
