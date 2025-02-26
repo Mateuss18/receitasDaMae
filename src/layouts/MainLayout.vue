@@ -30,24 +30,74 @@
 
         <br />
 
-        <label for="ingredientes">Ingredientes</label> <br />
-        <div v-for="recipeIngredient in recipeIngredients" :key="recipeIngredient.id">
-          <input
-            v-model="recipeIngredient.name"
-            type="text"
-            name="ingredientes"
-            id="ingredientes"
-            placeholder="Insira o ingrediente"
-            required
-          />
-          <button
-            v-if="recipeIngredients.indexOf(recipeIngredient) >= 1"
-            @click.prevent="removeIngredient(recipeIngredient.id)"
-          >
-            remover
-          </button>
+        <div class="duracao">
+          <label for="descricao">Duração</label> <br />
+          <div class="q-pa-md">
+            <q-slider v-model="value" :min="0" :max="60" :step="5" label label-always />
+          </div>
         </div>
-        <button @click.prevent="addIngredient()">Novo Ingrediente</button>
+
+        <br />
+
+        <div class="duracao">
+          <label for="descricao">Temperatura</label> <br />
+
+          <div class="row items-center">
+            <q-btn
+              round
+              icon="remove"
+              @click="decrementTemperature"
+              v-touch-repeat:0:150.mouse.enter.space="decrementTemperature"
+            />
+
+            <q-input
+              v-model="temperatura"
+              type="number"
+              class="q-mx-sm"
+              :min="0"
+              style="width: 100px"
+            >
+              <template #append>
+                <q-icon
+                  :name="temperatura > 200 ? 'local_fire_department' : 'thermostat'"
+                  :color="temperatura > 200 ? 'red' : 'orange'"
+                />
+              </template>
+            </q-input>
+
+            <q-btn
+              round
+              icon="add"
+              @click="ingrementTemperature"
+              v-touch-repeat:0:150.mouse.enter.space="ingrementTemperature"
+            />
+            <span class="text-caption q-ml-sm">°C</span>
+          </div>
+        </div>
+
+        <br />
+
+        <div class="ingredientes">
+          <label for="ingredientes">Ingredientes</label> <br />
+          <div v-for="recipeIngredient in recipeIngredients" :key="recipeIngredient.id">
+            <input
+              v-model="recipeIngredient.name"
+              type="text"
+              name="ingredientes"
+              id="ingredientes"
+              placeholder="Insira o ingrediente"
+              required
+            />
+            <button
+              v-if="recipeIngredients.indexOf(recipeIngredient) >= 1"
+              @click.prevent="removeIngredient(recipeIngredient.id)"
+            >
+              remover
+            </button>
+          </div>
+          <button @click.prevent="addIngredient()">Novo Ingrediente</button>
+        </div>
+
         <br />
         <br />
         <button type="submit" class="adicionarIngrediente">Adicionar receita</button>
@@ -80,6 +130,9 @@ let recipeName = ref(null)
 let recipeDescription = ref(null)
 let recipeIngredients = ref([{ id: Date.now(), name: '' }])
 let dataRecipes = ref([])
+
+let value = ref(30)
+let temperatura = ref(0)
 
 function addIngredient() {
   recipeIngredients.value.push({
@@ -124,6 +177,15 @@ function deleteRecipe(id) {
   dataRecipes.value = dataRecipes.value.filter((recipe) => recipe.id !== id)
 }
 
+function ingrementTemperature() {
+  temperatura.value = temperatura.value + 5
+}
+function decrementTemperature() {
+  if (temperatura.value > 0) {
+    temperatura.value = temperatura.value - 5
+  }
+}
+
 watch(
   dataRecipes,
   (newVal) => {
@@ -146,6 +208,9 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
+.duracao {
+  max-width: 400px;
+}
 label {
   display: flex;
   font-size: 28px;
