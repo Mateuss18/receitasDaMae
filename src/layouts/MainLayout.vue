@@ -2,19 +2,21 @@
   <q-layout view="lHh Lpr lFf">
     <MainHeader />
 
-    <div class="criarReceita">
-      <form @submit.prevent="addRecipe">
+    <div class="formRecipe__wrapper">
+      <form @submit.prevent="createRecipe">
         <h2>Criar nova receita</h2>
 
-        <label for="nome">Nome da receita</label> <br />
-        <input
-          v-model="recipeName"
-          type="text"
-          name="nome"
-          id="nome"
-          placeholder="Adicione o nome da receita"
-          required
-        />
+        <div class="formRecipe__name formRecipe__label">
+          <label for="nome">Nome da receita</label> <br />
+          <input
+            v-model="recipeName"
+            type="text"
+            name="nome"
+            id="nome"
+            placeholder="Adicione o nome da receita"
+            required
+          />
+        </div>
 
         <br />
 
@@ -33,13 +35,13 @@
         <div class="duracao">
           <label for="descricao">Duração</label> <br />
           <div class="q-pa-md">
-            <q-slider v-model="value" :min="0" :max="60" :step="5" label label-always />
+            <q-slider v-model="recipeDuration" :min="0" :max="60" :step="5" label label-always />
           </div>
         </div>
 
         <br />
 
-        <div class="duracao">
+        <div class="temperatura">
           <label for="descricao">Temperatura</label> <br />
 
           <div class="row items-center">
@@ -51,7 +53,7 @@
             />
 
             <q-input
-              v-model="temperatura"
+              v-model="recipeTemperature"
               type="number"
               class="q-mx-sm"
               :min="0"
@@ -59,8 +61,8 @@
             >
               <template #append>
                 <q-icon
-                  :name="temperatura > 200 ? 'local_fire_department' : 'thermostat'"
-                  :color="temperatura > 200 ? 'red' : 'orange'"
+                  :name="recipeTemperature > 200 ? 'local_fire_department' : 'thermostat'"
+                  :color="recipeTemperature > 200 ? 'red' : 'orange'"
                 />
               </template>
             </q-input>
@@ -112,11 +114,16 @@
         <br />
         <p>Descrição: {{ recipeItem.description }}</p>
         <br />
+        <p>Duração: {{ recipeItem.duration }}</p>
+        <br />
+        <p>Temperatura: {{ recipeItem.temperature }}</p>
+        <br />
         <p>
           Ingredientes: {{ recipeItem.ingredients.map((ingredient) => ingredient.name).join(', ') }}
         </p>
 
         <button @click="deleteRecipe(recipeItem.id)">Excluir</button>
+        <button @click="updateRecipe(recipeItem.id)">Editar</button>
       </div>
     </div>
   </q-layout>
@@ -126,13 +133,21 @@
 import MainHeader from 'src/components/MainHeader.vue'
 import { onMounted, ref, watch } from 'vue'
 
+// const stateRecipe = ref({
+//   recipeName,
+//   recipeDescription,
+//   recipeDuration,
+//   recipeTemperature,
+//   recipeIngredients
+// })
+
 let recipeName = ref(null)
 let recipeDescription = ref(null)
+let recipeDuration = ref(30)
+let recipeTemperature = ref(0)
 let recipeIngredients = ref([{ id: Date.now(), name: '' }])
-let dataRecipes = ref([])
 
-let value = ref(30)
-let temperatura = ref(0)
+let dataRecipes = ref([])
 
 function addIngredient() {
   recipeIngredients.value.push({
@@ -144,7 +159,7 @@ function removeIngredient(id) {
   recipeIngredients.value = recipeIngredients.value.filter((ingredient) => ingredient.id !== id)
 }
 
-function validatedInputs() {
+function validateInputs() {
   if (
     recipeName.value.trim() !== '' &&
     recipeDescription.value.trim() !== '' &&
@@ -155,34 +170,46 @@ function validatedInputs() {
     return false
   }
 }
-function addRecipe() {
-  if (validatedInputs) {
+function createRecipe() {
+  if (validateInputs) {
     dataRecipes.value.push({
       id: Date.now(),
       name: recipeName.value,
       description: recipeDescription.value,
+      duration: recipeDuration.value,
+      temperature: recipeTemperature.value,
       ingredients: recipeIngredients.value,
     })
 
-    recipeName.value = ''
-    recipeDescription.value = ''
-    recipeIngredients.value = []
-    recipeIngredients.value.push({
-      id: Date.now(),
-      name: '',
-    })
+    resetForm()
   }
+}
+function resetForm() {
+  recipeName.value = ''
+  recipeDescription.value = ''
+  recipeDuration.value = 30
+  recipeTemperature.value = 0
+  recipeIngredients.value = []
+  recipeIngredients.value.push({
+    id: Date.now(),
+    name: '',
+  })
 }
 function deleteRecipe(id) {
   dataRecipes.value = dataRecipes.value.filter((recipe) => recipe.id !== id)
 }
+function updateRecipe(id) {
+  const recipeToUpdate = ref(null)
+  recipeToUpdate.value = dataRecipes.value.filter((recipe) => recipe.id === id)
+  console.log(recipeToUpdate.value[0].name)
+}
 
 function ingrementTemperature() {
-  temperatura.value = temperatura.value + 5
+  recipeTemperature.value = recipeTemperature.value + 5
 }
 function decrementTemperature() {
-  if (temperatura.value > 0) {
-    temperatura.value = temperatura.value - 5
+  if (recipeTemperature.value > 0) {
+    recipeTemperature.value = recipeTemperature.value - 5
   }
 }
 
@@ -213,13 +240,13 @@ onMounted(() => {
 }
 label {
   display: flex;
-  font-size: 28px;
+  font-size: 20px;
   margin-top: 12px;
 }
 input {
-  height: 60px;
+  height: 40px;
   width: 400px;
-  font-size: 22px;
+  font-size: 18px;
 }
 button {
   font-size: 22px;
