@@ -4,10 +4,10 @@
 
     <div class="formRecipe__wrapper">
       <form @submit.prevent="createRecipe">
-        <h2>Criar nova receita</h2>
+        <h2 class="form_recipe__title">Criar nova receita</h2>
 
-        <div class="formRecipe__name formRecipe__label">
-          <label for="nome">Nome da receita</label> <br />
+        <div class="formRecipe__label">
+          <label for="nome">Nome da receita</label>
           <input
             v-model="recipeName"
             type="text"
@@ -18,30 +18,26 @@
           />
         </div>
 
-        <br />
+        <div class="formRecipe__label">
+          <label for="descricao">Descrição</label>
+          <input
+            v-model="recipeDescription"
+            type="text"
+            name="descricao"
+            id="descricao"
+            placeholder="Fale um pouco sobre a receita"
+            required
+          />
+        </div>
 
-        <label for="descricao">Descrição</label> <br />
-        <input
-          v-model="recipeDescription"
-          type="text"
-          name="descricao"
-          id="descricao"
-          placeholder="Fale um pouco sobre a receita"
-          required
-        />
-
-        <br />
-
-        <div class="duracao">
+        <div class="formRecipe__label">
           <label for="descricao">Duração</label> <br />
           <div class="q-pa-md">
             <q-slider v-model="recipeDuration" :min="0" :max="60" :step="5" label label-always />
           </div>
         </div>
 
-        <br />
-
-        <div class="temperatura">
+        <div class="formRecipe__label">
           <label for="descricao">Temperatura</label> <br />
 
           <div class="row items-center">
@@ -77,9 +73,7 @@
           </div>
         </div>
 
-        <br />
-
-        <div class="ingredientes">
+        <div class="formRecipe__label">
           <label for="ingredientes">Ingredientes</label> <br />
           <div v-for="recipeIngredient in recipeIngredients" :key="recipeIngredient.id">
             <input
@@ -100,9 +94,19 @@
           <button @click.prevent="addIngredient()">Novo Ingrediente</button>
         </div>
 
-        <br />
-        <br />
-        <button type="submit" class="adicionarIngrediente">Adicionar receita</button>
+        <div class="formRecipe__label">
+          <label for="modo_preparo">Modo de preparo</label>
+          <input
+            v-model="recipeDescription"
+            type="text"
+            name="preparo"
+            id="preparo"
+            placeholder="Descreva o modo de praparo"
+            required
+          />
+        </div>
+
+        <button type="submit" class="formRecipe__button">Criar receita</button>
       </form>
     </div>
 
@@ -114,9 +118,9 @@
         <br />
         <p>Descrição: {{ recipeItem.description }}</p>
         <br />
-        <p>Duração: {{ recipeItem.duration }}</p>
+        <p>Duração: {{ recipeItem.duration }} minutos</p>
         <br />
-        <p>Temperatura: {{ recipeItem.temperature }}</p>
+        <p>Temperatura: {{ recipeItem.temperature }} °C</p>
         <br />
         <p>
           Ingredientes: {{ recipeItem.ingredients.map((ingredient) => ingredient.name).join(', ') }}
