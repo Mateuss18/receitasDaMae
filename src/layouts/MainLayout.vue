@@ -106,7 +106,9 @@
           />
         </div>
 
-        <button type="submit" class="formRecipe__button">Criar receita</button>
+        <button type="submit" class="formRecipe__button">Criar receitaa</button>
+        <a href="/create-recipe" class="fromRecipe__add">+</a>
+        <q-btn round color="pink-4" size="xl" icon="add" />
       </form>
     </div>
 
@@ -114,6 +116,7 @@
       <h2>Receitas</h2>
 
       <div v-for="recipeItem in dataRecipes" :key="recipeItem.id" class="receita">
+        <p>id: {{ recipeItem.id }}</p>
         <p>Nome: {{ recipeItem.name }}</p>
         <br />
         <p>Descrição: {{ recipeItem.description }}</p>
@@ -175,7 +178,7 @@ function validateInputs() {
   }
 }
 function createRecipe() {
-  if (validateInputs) {
+  if (validateInputs()) {
     dataRecipes.value.push({
       id: Date.now(),
       name: recipeName.value,

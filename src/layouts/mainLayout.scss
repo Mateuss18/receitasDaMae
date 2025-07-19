@@ -8,7 +8,7 @@ label {
 }
 input {
   height: 40px;
-  width: 400px;
+  width: 100%;
   font-size: 18px;
 }
 button {
@@ -20,12 +20,13 @@ button {
 }
 header {
   background-color: $primary;
-}
-header h1 {
-  font-size: 24px;
-  font-weight: 500;
-  line-height: normal;
-  color: #fff;
+
+  & h1 {
+    font-size: 24px;
+    font-weight: 500;
+    line-height: normal;
+    color: #fff;
+  }
 }
 h2 {
   font-size: 22px;
@@ -43,7 +44,35 @@ h2 {
   padding: 10px;
   background-color: #000000;
   color: #fff;
+
+  & p {
+    margin: 0;
+  }
 }
-.receita p {
-  margin: 0;
+form {
+  position: relative;
+  padding: 0 12px;
+  width: 100%;
+}
+.fromRecipe__add {
+  z-index: 2;
+  font-size: 50px;
+  padding-bottom: 2px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  height: 75px;
+  width: 75px;
+
+  border-radius: 50%;
+  transform: translateX(-50%);
+  text-decoration: none;
+
+  color: #fff;
+  background-color: $primary;
 }

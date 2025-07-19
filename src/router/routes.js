@@ -6,6 +6,10 @@ const routes = [
       { path: '', component: () => import('pages/IndexPage.vue') }
     ]
   },
+  {
+    path: '/create-recipe',
+    component: () => import('pages/RecipeCreate.vue')
+  },
 
   // Always leave this as last one,
   // but you can also remove it
