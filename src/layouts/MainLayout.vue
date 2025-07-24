@@ -3,13 +3,13 @@
     <MainHeader />
 
     <div class="formRecipe__wrapper">
-      <form @submit.prevent="createRecipe">
+      <form @submit.prevent="handleSubmitRecipe">
         <h2 class="form_recipe__title">Criar nova receita</h2>
 
         <div class="formRecipe__label">
           <label for="nome">Nome da receita</label>
           <input
-            v-model="recipeName"
+            v-model="recipe.name"
             type="text"
             name="nome"
             id="nome"
@@ -21,7 +21,7 @@
         <div class="formRecipe__label">
           <label for="descricao">Descrição</label>
           <input
-            v-model="recipeDescription"
+            v-model="recipe.description"
             type="text"
             name="descricao"
             id="descricao"
@@ -31,73 +31,38 @@
         </div>
 
         <div class="formRecipe__label">
-          <label for="descricao">Duração</label> <br />
+          <label for="descricao">Duração total em minutos</label> <br />
           <div class="q-pa-md">
-            <q-slider v-model="recipeDuration" :min="0" :max="60" :step="5" label label-always />
-          </div>
-        </div>
-
-        <div class="formRecipe__label">
-          <label for="descricao">Temperatura</label> <br />
-
-          <div class="row items-center">
-            <q-btn
-              round
-              icon="remove"
-              @click="decrementTemperature"
-              v-touch-repeat:0:150.mouse.enter.space="decrementTemperature"
-            />
-
-            <q-input
-              v-model="recipeTemperature"
-              type="number"
-              class="q-mx-sm"
-              :min="0"
-              style="width: 100px"
-            >
-              <template #append>
-                <q-icon
-                  :name="recipeTemperature > 200 ? 'local_fire_department' : 'thermostat'"
-                  :color="recipeTemperature > 200 ? 'red' : 'orange'"
-                />
-              </template>
-            </q-input>
-
-            <q-btn
-              round
-              icon="add"
-              @click="ingrementTemperature"
-              v-touch-repeat:0:150.mouse.enter.space="ingrementTemperature"
-            />
-            <span class="text-caption q-ml-sm">°C</span>
+            <q-slider v-model="recipe.duration" :min="0" :max="60" :step="5" label label-always />
           </div>
         </div>
 
         <div class="formRecipe__label">
           <label for="ingredientes">Ingredientes</label> <br />
-          <div v-for="recipeIngredient in recipeIngredients" :key="recipeIngredient.id">
+          <div v-for="(ingredient, index) in recipe.ingredients" :key="index">
             <input
-              v-model="recipeIngredient.name"
+              v-model="recipe.ingredients[index]"
               type="text"
               name="ingredientes"
               id="ingredientes"
-              placeholder="Insira o ingrediente"
+              :placeholder="`Ingrediente ${index + 1}`"
               required
             />
             <button
-              v-if="recipeIngredients.indexOf(recipeIngredient) >= 1"
-              @click.prevent="removeIngredient(recipeIngredient.id)"
+              v-if="recipe.ingredients.length >= 2"
+              type="button"
+              @click="removeIngredient(index)"
             >
               remover
             </button>
           </div>
-          <button @click.prevent="addIngredient()">Novo Ingrediente</button>
+          <button type="button" @click="addIngredient">Adicionar Ingrediente</button>
         </div>
 
         <div class="formRecipe__label">
           <label for="modo_preparo">Modo de preparo</label>
           <input
-            v-model="recipeDescription"
+            v-model="recipe.preparationMethod"
             type="text"
             name="preparo"
             id="preparo"
@@ -106,9 +71,11 @@
           />
         </div>
 
-        <button type="submit" class="formRecipe__button">Criar receitaa</button>
-        <a href="/create-recipe" class="fromRecipe__add">+</a>
-        <q-btn round color="pink-4" size="xl" icon="add" />
+        <button type="submit" class="formRecipe__button">
+          {{ editingId ? 'Atualizar' : 'Criar receita' }}
+        </button>
+        <!-- <a href="/create-recipe" class="fromRecipe__add">+</a>
+        <q-btn round color="pink-4" size="xl" icon="add" /> -->
       </form>
     </div>
 
@@ -117,127 +84,124 @@
 
       <div v-for="recipeItem in dataRecipes" :key="recipeItem.id" class="receita">
         <p>id: {{ recipeItem.id }}</p>
+        <br />
         <p>Nome: {{ recipeItem.name }}</p>
         <br />
         <p>Descrição: {{ recipeItem.description }}</p>
         <br />
         <p>Duração: {{ recipeItem.duration }} minutos</p>
         <br />
-        <p>Temperatura: {{ recipeItem.temperature }} °C</p>
+        <p>Ingredientes: {{ recipeItem.ingredients.join(', ') }}</p>
         <br />
-        <p>
-          Ingredientes: {{ recipeItem.ingredients.map((ingredient) => ingredient.name).join(', ') }}
-        </p>
+        <p>Modo de preparo: {{ recipeItem.preparationMethod }}</p>
 
         <button @click="deleteRecipe(recipeItem.id)">Excluir</button>
-        <button @click="updateRecipe(recipeItem.id)">Editar</button>
+        <button @click="startEdit(recipeItem)">Editar</button>
       </div>
     </div>
   </q-layout>
 </template>
 
 <script setup>
+import { onMounted, ref } from 'vue'
+import { v4 as uuidv4 } from 'uuid'
 import MainHeader from 'src/components/MainHeader.vue'
-import { onMounted, ref, watch } from 'vue'
 
-// const stateRecipe = ref({
-//   recipeName,
-//   recipeDescription,
-//   recipeDuration,
-//   recipeTemperature,
-//   recipeIngredients
-// })
+// let recipeCategory
 
-let recipeName = ref(null)
-let recipeDescription = ref(null)
-let recipeDuration = ref(30)
-let recipeTemperature = ref(0)
-let recipeIngredients = ref([{ id: Date.now(), name: '' }])
+const dataRecipes = ref([])
+let editingId = ref(null)
+const recipe = ref({
+  name: '',
+  description: '',
+  duration: 30,
+  ingredients: [''],
+  preparationMethod: '',
+})
 
-let dataRecipes = ref([])
-
-function addIngredient() {
-  recipeIngredients.value.push({
-    id: Date.now(),
-    name: '',
-  })
+const saveToLocalStorage = () => {
+  localStorage.setItem('recipes', JSON.stringify(dataRecipes.value))
 }
-function removeIngredient(id) {
-  recipeIngredients.value = recipeIngredients.value.filter((ingredient) => ingredient.id !== id)
+const loadFromLocalStorage = () => {
+  return JSON.parse(localStorage.getItem('recipes')) || []
 }
 
-function validateInputs() {
+const addIngredient = () => {
+  recipe.value.ingredients.push('')
+}
+const removeIngredient = (index) => {
+  recipe.value.ingredients.splice(index, 1)
+}
+
+const createRecipe = () => {
+  const recipeItem = {
+    id: uuidv4(),
+    name: recipe.value.name,
+    description: recipe.value.description,
+    duration: recipe.value.duration,
+    ingredients: recipe.value.ingredients,
+    preparationMethod: recipe.value.preparationMethod,
+  }
+  dataRecipes.value.push(recipeItem)
+  saveToLocalStorage()
+}
+const updateRecipe = () => {
+  dataRecipes.value = dataRecipes.value.map((recipeItem) =>
+    recipeItem.id === editingId.value
+      ? { ...recipeItem, ...recipe.value, ingredients: recipe.value.ingredients }
+      : recipeItem,
+  )
+  saveToLocalStorage()
+}
+const deleteRecipe = (id) => {
+  dataRecipes.value = dataRecipes.value.filter((recipeItem) => recipeItem.id !== id)
+  saveToLocalStorage()
+}
+const startEdit = (recipeItem) => {
+  recipe.value = {
+    ...recipeItem,
+    ingredients: recipeItem.ingredients.length ? [...recipeItem.ingredients] : [''],
+  }
+  editingId.value = recipeItem.id
+}
+
+const handleSubmitRecipe = () => {
+  if (validateRecipeForm()) {
+    if (editingId.value) {
+      updateRecipe()
+      editingId.value = null
+    } else {
+      createRecipe()
+    }
+
+    resetRecipeForm()
+  }
+}
+
+const validateRecipeForm = () => {
   if (
-    recipeName.value.trim() !== '' &&
-    recipeDescription.value.trim() !== '' &&
-    recipeIngredients.value.some((ingredint) => ingredint.name.trim() !== '')
+    recipe.value.name &&
+    recipe.value.description &&
+    recipe.value.ingredients.some((ingredint) => ingredint.trim()) &&
+    recipe.value.preparationMethod
   ) {
     return true
   } else {
     return false
   }
 }
-function createRecipe() {
-  if (validateInputs()) {
-    dataRecipes.value.push({
-      id: Date.now(),
-      name: recipeName.value,
-      description: recipeDescription.value,
-      duration: recipeDuration.value,
-      temperature: recipeTemperature.value,
-      ingredients: recipeIngredients.value,
-    })
-
-    resetForm()
-  }
-}
-function resetForm() {
-  recipeName.value = ''
-  recipeDescription.value = ''
-  recipeDuration.value = 30
-  recipeTemperature.value = 0
-  recipeIngredients.value = []
-  recipeIngredients.value.push({
-    id: Date.now(),
+const resetRecipeForm = () => {
+  recipe.value = {
     name: '',
-  })
-}
-function deleteRecipe(id) {
-  dataRecipes.value = dataRecipes.value.filter((recipe) => recipe.id !== id)
-}
-function updateRecipe(id) {
-  const recipeToUpdate = ref(null)
-  recipeToUpdate.value = dataRecipes.value.filter((recipe) => recipe.id === id)
-  console.log(recipeToUpdate.value[0].name)
-}
-
-function ingrementTemperature() {
-  recipeTemperature.value = recipeTemperature.value + 5
-}
-function decrementTemperature() {
-  if (recipeTemperature.value > 0) {
-    recipeTemperature.value = recipeTemperature.value - 5
+    description: '',
+    duration: 30,
+    ingredients: [''],
+    preparationMethod: '',
   }
 }
-
-watch(
-  dataRecipes,
-  (newVal) => {
-    try {
-      localStorage.setItem('Receitas', JSON.stringify(newVal))
-    } catch (error) {
-      console.error('Erro ao acessar localStorage: ', error)
-    }
-  },
-  { deep: true },
-)
 
 onMounted(() => {
-  const dataRecipeJSON = localStorage.getItem('Receitas')
-
-  if (dataRecipeJSON) {
-    dataRecipes.value = JSON.parse(dataRecipeJSON)
-  }
+  dataRecipes.value = loadFromLocalStorage()
 })
 </script>
 
