@@ -85,8 +85,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
+import { getAll, saveAll } from '../services/recipesStorage'
 
 const dataRecipes = ref([])
 let editingId = ref(null)
@@ -98,13 +99,18 @@ const recipe = ref({
   preparationMethod: '',
 })
 
+onMounted(() => {
+  dataRecipes.value = getAll()
+})
+
 const saveToLocalStorage = () => {
-  localStorage.setItem('recipes', JSON.stringify(dataRecipes.value))
+  saveAll(dataRecipes.value)
 }
 
 const addIngredient = () => {
   recipe.value.ingredients.push('')
 }
+
 const removeIngredient = (index) => {
   recipe.value.ingredients.splice(index, 1)
 }
@@ -121,6 +127,7 @@ const createRecipe = () => {
   dataRecipes.value.push(recipeItem)
   saveToLocalStorage()
 }
+
 const updateRecipe = () => {
   dataRecipes.value = dataRecipes.value.map((recipeItem) =>
     recipeItem.id === editingId.value
@@ -155,6 +162,7 @@ const validateRecipeForm = () => {
     return false
   }
 }
+
 const resetRecipeForm = () => {
   recipe.value = {
     name: '',
