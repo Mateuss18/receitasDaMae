@@ -28,7 +28,7 @@
         <p>Modo de preparo: {{ recipeItem.preparationMethod }}</p>
 
         <button @click="deleteRecipe(recipeItem.id)">Excluir</button>
-        <button @click="startEdit(recipeItem)">Editar</button>
+        <button @click="editRecipe(recipeItem.id)">Editar</button>
       </div>
     </div>
   </q-layout>
@@ -37,16 +37,19 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import MainHeader from 'src/components/MainHeader.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const dataRecipes = ref([])
-let editingId = ref(null)
-const recipe = ref({
-  name: '',
-  description: '',
-  duration: 30,
-  ingredients: [''],
-  preparationMethod: '',
-})
+// let editingId = ref(null)
+// const recipe = ref({
+//   name: '',
+//   description: '',
+//   duration: 30,
+//   ingredients: [''],
+//   preparationMethod: '',
+// })
 
 const saveToLocalStorage = () => {
   localStorage.setItem('recipes', JSON.stringify(dataRecipes.value))
@@ -59,12 +62,16 @@ const deleteRecipe = (id) => {
   dataRecipes.value = dataRecipes.value.filter((recipeItem) => recipeItem.id !== id)
   saveToLocalStorage()
 }
-const startEdit = (recipeItem) => {
-  recipe.value = {
-    ...recipeItem,
-    ingredients: recipeItem.ingredients.length ? [...recipeItem.ingredients] : [''],
-  }
-  editingId.value = recipeItem.id
+// const startEdit = (recipeItem) => {
+//   recipe.value = {
+//     ...recipeItem,
+//     ingredients: recipeItem.ingredients.length ? [...recipeItem.ingredients] : [''],
+//   }
+//   editingId.value = recipeItem.id
+// }
+
+const editRecipe = (id) => {
+  router.push({ name: 'edit', params: { id } })
 }
 
 onMounted(() => {

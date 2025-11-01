@@ -10,6 +10,11 @@ const routes = [
     path: '/create-recipe',
     component: () => import('pages/RecipeCreate.vue')
   },
+  {
+    name: 'edit',
+    path: '/edit/:id',
+    component: () => import('pages/RecipeEdit.vue')
+  },
 
   // Always leave this as last one,
   // but you can also remove it
