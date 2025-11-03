@@ -1,19 +1,22 @@
 <template>
   <div v-if="selectedRecipe">
-    <pre>
-      {{ selectedRecipe }}
-        ola mundo
-    </pre>
+    <RecipeForm
+      title="Editar receita"
+      :recipe-values="selectedRecipe"
+      mode="edit"
+      @submit="handleSubmitEdit"
+    />
   </div>
+  <div v-else>Receita não existe</div>
 </template>
 
 <script setup>
 import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getAll } from '../services/recipesStorage'
+import { getAll, saveAll } from '../services/recipesStorage'
+import RecipeForm from 'src/components/RecipeForm.vue'
 
 const dataRecipes = ref([])
-// eslint-disable-next-line no-unused-vars
 const router = useRouter()
 const route = useRoute()
 const recipeToEditID = String(route.params.id)
@@ -25,4 +28,14 @@ onMounted(() => {
 const selectedRecipe = computed(() => {
   return dataRecipes.value.find((recipeItem) => recipeItem.id === recipeToEditID)
 })
+
+function handleSubmitEdit(payload) {
+  const idToEditIndex = dataRecipes.value.findIndex(
+    (recipeItem) => recipeItem.id === recipeToEditID,
+  )
+  dataRecipes.value[idToEditIndex] = { id: recipeToEditID, ...payload }
+  saveAll(dataRecipes.value)
+
+  router.replace('/')
+}
 </script>
