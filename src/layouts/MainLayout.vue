@@ -15,18 +15,7 @@
       <h2>Receitas</h2>
 
       <div v-for="recipeItem in dataRecipes" :key="recipeItem.id" class="receita">
-        <p>id: {{ recipeItem.id }}</p>
-        <br />
-        <p>Nome: {{ recipeItem.name }}</p>
-        <br />
-        <p>Descrição: {{ recipeItem.description }}</p>
-        <br />
-        <p>Duração: {{ recipeItem.duration }} minutos</p>
-        <br />
-        <p>Ingredientes: {{ recipeItem.ingredients.join(', ') }}</p>
-        <br />
-        <p>Modo de preparo: {{ recipeItem.preparationMethod }}</p>
-
+        <RecipeCard :recipe="recipeItem" @click="openRecipe(recipeItem.id)" />
         <button @click="deleteRecipe(recipeItem.id)">Excluir</button>
         <button @click="editRecipe(recipeItem.id)">Editar</button>
       </div>
@@ -37,6 +26,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import MainHeader from 'src/components/MainHeader.vue'
+import RecipeCard from 'src/components/RecipeCard.vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -55,6 +45,10 @@ const deleteRecipe = (id) => {
 }
 const editRecipe = (id) => {
   router.push({ name: 'edit', params: { id } })
+}
+
+const openRecipe = (id) => {
+  router.push({ name: 'detail', params: { id } })
 }
 
 onMounted(() => {

@@ -1,5 +1,6 @@
 const routes = [
   {
+    name: 'home',
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
@@ -7,6 +8,7 @@ const routes = [
     ]
   },
   {
+    name: 'create',
     path: '/create-recipe',
     component: () => import('pages/RecipeCreate.vue')
   },
@@ -14,6 +16,11 @@ const routes = [
     name: 'edit',
     path: '/edit/:id',
     component: () => import('pages/RecipeEdit.vue')
+  },
+  {
+    name: 'detail',
+    path: '/recipe/:id',
+    component: () => import('pages/RecipeDetail.vue')
   },
 
   // Always leave this as last one,
