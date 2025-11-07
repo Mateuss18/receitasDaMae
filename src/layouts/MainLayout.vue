@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <MainHeader />
+    <NavBar />
 
     <q-btn
       @click="$router.replace('/create-recipe')"
@@ -25,23 +25,17 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import MainHeader from 'src/components/MainHeader.vue'
+import NavBar from 'src/components/NavBar.vue'
 import RecipeCard from 'src/components/RecipeCard.vue'
 import { useRouter } from 'vue-router'
+import { getAll, saveAll } from '../services/recipesStorage'
 
 const router = useRouter()
 const dataRecipes = ref([])
 
-const saveToLocalStorage = () => {
-  localStorage.setItem('recipes', JSON.stringify(dataRecipes.value))
-}
-const loadFromLocalStorage = () => {
-  return JSON.parse(localStorage.getItem('recipes')) || []
-}
-
 const deleteRecipe = (id) => {
   dataRecipes.value = dataRecipes.value.filter((recipeItem) => recipeItem.id !== id)
-  saveToLocalStorage()
+  saveAll(dataRecipes.value)
 }
 const editRecipe = (id) => {
   router.push({ name: 'edit', params: { id } })
@@ -52,7 +46,7 @@ const openRecipe = (id) => {
 }
 
 onMounted(() => {
-  dataRecipes.value = loadFromLocalStorage()
+  dataRecipes.value = getAll()
 })
 </script>
 
