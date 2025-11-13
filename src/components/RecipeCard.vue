@@ -1,29 +1,16 @@
 <template>
-  <div class="recipe-card">
-    <img
-      src="https://plus.unsplash.com/premium_photo-1723478417559-2349252a3dda?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1066"
-      alt=""
-      height="170"
-      width="400"
-    />
-    <div class="recipe-card__text">
-      <h3 v-if="recipe?.name">{{ recipe.name }}</h3>
-      <p v-if="recipe?.description">{{ recipe.description }}</p>
-    </div>
-  </div>
-
-  <q-card class="recipe-card">
+  <q-card v-if="recipe" class="recipe-card">
     <img src="https://cdn.quasar.dev/img/mountains.jpg" height="170" width="400" />
 
-    <q-card-section>
-      <div class="text-h6">Our Changing Planet</div>
-    </q-card-section>
+    <div class="recipe-card__text">
+      <q-card-section v-if="recipe?.name" class="recipe-card__title">
+        <div class="text-h6">{{ recipe.name }}</div>
+      </q-card-section>
 
-    <q-card-section class="q-pt-none">
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa necessitatibus perferendis fugit
-      nemo aliquam expedita? Perspiciatis fugiat eveniet amet consectetur provident error ratione
-      blanditiis, doloribus officia aliquam repellat et numquam.
-    </q-card-section>
+      <q-card-section v-if="recipe?.description" class="recipe-card__description q-pt-none">
+        {{ recipe.description }}
+      </q-card-section>
+    </div>
   </q-card>
 </template>
 
@@ -53,10 +40,11 @@ defineProps({
 .recipe-card__text {
   padding: 16px;
 }
-.recipe-card__text h3 {
+.recipe-card__title {
   font-size: 20px;
   font-weight: 500;
   line-height: 1.3;
+  padding: 0;
   margin: 0 0 8px 0;
   max-height: 50px;
   overflow: hidden;
@@ -65,8 +53,9 @@ defineProps({
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
-.recipe-card__text p {
+.recipe-card__description {
   margin: 0;
+  padding: 0;
   color: #1d1d1d;
   font-weight: 400;
   font-size: 18px;
