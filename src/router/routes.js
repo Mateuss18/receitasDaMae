@@ -2,16 +2,17 @@ const routes = [
   {
     name: 'home',
     path: '/',
-    component: () => import('layouts/MainLayout.vue'),
+    component: () => import('src/layouts/LayoutDefault.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') }
+      { path: '', component: () => import('pages/HomePage.vue') },
+      { path: '/create-recipe', component: () => import('pages/RecipeCreate.vue') }
     ]
   },
-  {
-    name: 'create',
-    path: '/create-recipe',
-    component: () => import('pages/RecipeCreate.vue')
-  },
+  // {
+  //   name: 'create',
+  //   path: '/create-recipe',
+  //   component: () => import('pages/RecipeCreate.vue')
+  // },
   {
     name: 'edit',
     path: '/edit/:id',
