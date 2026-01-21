@@ -1,24 +1,22 @@
 <template>
-  <header class="app-header full-width q-pb-sm">
-    <div class="header-top relative-position flex flex-center">
+  <header class="app-header full-width">
+    <div class="header-top flex flex-center relative-position">
       <q-btn
         v-if="route.path !== '/'"
         flat
         round
         dense
         icon="arrow_back"
-        class="button-back absolute-left q-ml-sm"
+        class="button-back q-ml-sm absolute-left"
         @click="goBack"
       />
 
       <router-link to="/" class="text-decoration-none text-white">
-        <h1 class="text-center q-my-sm text-h5 text-weight-bold">Receitas da Mãe</h1>
+        <h1 class="text-center text-weight-bold">Receitas da Mãe</h1>
       </router-link>
-    </div>
 
-    <nav class="q-px-md q-pb-sm">
-      <input class="full-width search-input" type="text" placeholder="Busque suas receitas.." />
-    </nav>
+      <div id="header-actions-portal"></div>
+    </div>
   </header>
 </template>
 
