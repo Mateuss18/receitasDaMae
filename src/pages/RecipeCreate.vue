@@ -1,21 +1,12 @@
 <template>
   <div class="recipe-create">
     <RecipeForm
-      title="Criar receita"
+      title="Criar Receita"
       :recipe-values="recipe"
       mode="create"
       @submit="handleSubmitCreate"
     />
   </div>
-
-  <q-btn
-    @click="$router.replace('/')"
-    class="fromRecipe__add"
-    round
-    color="pink-4"
-    size="xl"
-    icon="add"
-  />
 </template>
 
 <script setup>
