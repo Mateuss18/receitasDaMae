@@ -21,18 +21,11 @@
 </template>
 
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
+import { useGoBack } from 'src/composables/useGoBack'
 
 const route = useRoute()
-const router = useRouter()
-
-const goBack = () => {
-  if (window.history.length > 1) {
-    router.back()
-  } else {
-    router.push('/')
-  }
-}
+const { goBack } = useGoBack()
 </script>
 
 <style scoped lang="scss">
