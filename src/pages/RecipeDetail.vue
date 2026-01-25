@@ -29,12 +29,41 @@
       </q-card>
     </q-dialog>
 
-    <p>id: {{ selectedRecipe.id }}</p>
-    <p>Nome: {{ selectedRecipe.name }}</p>
-    <p>Descrição: {{ selectedRecipe.description }}</p>
-    <p>Duração: {{ selectedRecipe.duration }} minutos</p>
-    <p>Ingredientes: {{ selectedRecipe.ingredients.join(', ') }}</p>
-    <p>Modo de preparo: {{ selectedRecipe.preparationMethod }}</p>
+    <!-- <p>id: {{ selectedRecipe.id }}</p> -->
+    <h2 class="recipe-detail__title">{{ selectedRecipe.name }}</h2>
+
+    <div class="recipe-detail__description">
+      <p class="recipe-detail__description-text">{{ selectedRecipe.description }}</p>
+    </div>
+
+    <q-separator class="q-my-md" />
+
+    <div class="recipe-detail__duration">
+      <h3 class="recipe-detail__duration-title">Duração</h3>
+      <p class="recipe-detail__duration-value">{{ selectedRecipe.duration }} minutos</p>
+    </div>
+
+    <q-separator class="q-my-md" />
+
+    <div class="recipe-detail__ingredients">
+      <h3 class="recipe-detail__ingredients-title">Ingredientes</h3>
+      <ul class="recipe-detail__ingredients-list">
+        <q-chip
+          v-for="(ingredient, index) in selectedRecipe.ingredients"
+          :key="index"
+          class="recipe-detail__ingredients-item"
+        >
+          {{ ingredient }}
+        </q-chip>
+      </ul>
+    </div>
+
+    <q-separator class="q-my-md" />
+
+    <div class="recipe-detail__preparation">
+      <h3 class="recipe-detail__preparation-title">Modo de preparo</h3>
+      <p class="recipe-detail__preparation-text">{{ selectedRecipe.preparationMethod }}</p>
+    </div>
   </div>
 </template>
 
@@ -71,3 +100,71 @@ const selectedRecipe = computed(() => {
   return dataRecipes.value.find((recipeItem) => recipeItem.id === recipeId)
 })
 </script>
+
+<style scoped lang="scss">
+.recipe-detail {
+  padding: 20px;
+
+  &__title {
+    font-weight: 600;
+    padding: 0;
+    margin-bottom: 8px;
+  }
+
+  &__description {
+    &-text {
+      font-size: 18px;
+      line-height: 1.4;
+      margin: 0;
+    }
+  }
+
+  &__duration {
+    &-title {
+      font-size: 18px;
+      font-weight: 600;
+      padding: 0;
+      margin-bottom: 8px;
+    }
+    &-value {
+      font-size: 18px;
+      line-height: 1.4;
+      margin: 0;
+    }
+  }
+
+  &__ingredients {
+    &-title {
+      font-size: 18px;
+      font-weight: 600;
+      padding: 0;
+      margin-bottom: 8px;
+    }
+    &-list {
+      padding: 0;
+      margin: 0;
+      font-weight: 600;
+    }
+    &-item {
+      background-color: $primary-light;
+      font-size: 18px;
+      line-height: 1.4;
+      color: #000;
+    }
+  }
+
+  &__preparation {
+    &-title {
+      font-size: 18px;
+      font-weight: 600;
+      padding: 0;
+      margin-bottom: 8px;
+    }
+    &-text {
+      font-size: 18px;
+      line-height: 1.4;
+      margin: 0;
+    }
+  }
+}
+</style>
