@@ -29,51 +29,62 @@
         />
       </div>
 
-      <div class="form-recipe__label">
-        <label for="descricao">Duração total em minutos</label> <br />
-        <div class="q-pa-md">
-          <q-slider v-model="form.duration" :min="0" :max="60" :step="5" label label-always />
-        </div>
+      <div class="form-recipe__label duration-group">
+        <label for="duration">Duração total em minutos</label>
+        <q-slider v-model="form.duration" :min="0" :max="60" :step="5" label label-always />
       </div>
 
       <div class="form-recipe__label">
-        <label for="ingredientes">Ingredientes</label> <br />
-        <div v-for="(ingredient, index) in form.ingredients" :key="index">
+        <label for="ingredints">Ingredientes</label>
+        <div
+          v-for="(ingredint, index) in form.ingredients"
+          :key="index"
+          class="form-recipe__ingredient-group"
+        >
           <input
             v-model="form.ingredients[index]"
             type="text"
-            name="ingredientes"
-            id="ingredientes"
+            name="ingredints"
+            id="ingredints"
             :placeholder="`Ingrediente ${index + 1}`"
             required
           />
-          <button
+          <q-btn
             :disabled="form.ingredients.length <= 1"
-            type="button"
             @click="removeIngredient(index)"
-          >
-            remover
-          </button>
+            icon="delete"
+            color="red"
+            flat
+            round
+          />
         </div>
-        <button type="button" @click="addIngredient">Adicionar Ingrediente</button>
+        <!-- <button type="button" @click="addIngredient">+ Adicionar ingrediente</button> -->
+
+        <q-btn
+          class="form-recipe__btn-add-ingredient"
+          @click="addIngredient"
+          icon="add"
+          label="Adicionar ingrediente"
+          color="primary"
+          push
+        />
       </div>
 
       <div class="form-recipe__label">
-        <label for="modo_preparo">Modo de preparo</label>
-        <input
+        <label for="preparation">Modo de preparo</label>
+        <textarea
           v-model="form.preparationMethod"
           type="text"
-          name="preparo"
-          id="preparo"
+          name="preparation"
+          id="preparation"
           placeholder="Descreva o modo de preparo"
           required
         />
       </div>
 
       <div class="form-recipe__buttons">
-        <button type="submit" class="form-recipe__button">Salvar</button>
-
-        <button @click="onCancel" type="button" class="form-recipe__button">Cancelar</button>
+        <q-btn type="submit" push color="green" label="Salvar" class="form-recipe__button" />
+        <q-btn @click="goBack" push color="red" label="Cancelar" class="form-recipe__button" />
       </div>
     </form>
   </div>
@@ -81,9 +92,10 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
+import { useGoBack } from 'src/composables/useGoBack'
+
+const { goBack } = useGoBack()
 
 // eslint-disable-next-line no-unused-vars
 const { title, recipeValues, mode } = defineProps({
@@ -124,11 +136,9 @@ const emit = defineEmits(['submit'])
 function onSubmit() {
   if (validateRecipeForm()) {
     emit('submit', form.value)
-  }
-}
 
-function onCancel() {
-  router.replace('/')
+    goBack()
+  }
 }
 
 const validateRecipeForm = () => {
@@ -152,3 +162,64 @@ watch(
   { deep: true },
 )
 </script>
+
+<style scoped lang="scss">
+.form-recipe {
+  &__title {
+    text-align: center;
+    font-weight: 500;
+    padding: 14px 0 0 0;
+  }
+  &__label {
+    margin-top: 20px;
+
+    label {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    input {
+      border-radius: 6px;
+      padding-left: 12px;
+      border: 1px solid #838383;
+    }
+  }
+  .duration-group {
+    .q-slider {
+      padding: 26px 6px 0 6px;
+    }
+  }
+  &__ingredient-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  &__btn-add-ingredient {
+    width: 100%;
+    border-radius: 6px;
+  }
+  textarea#preparation {
+    min-height: 150px;
+    width: 100%;
+    padding-left: 16px;
+    padding-top: 6px;
+    font-size: 18px;
+    border-radius: 6px;
+    border: 1px solid #838383;
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 14px;
+    margin-top: 24px;
+    padding-bottom: 20px;
+
+    button {
+      flex: 1;
+      height: 45px;
+      font-weight: 700;
+      font-size: 18px;
+    }
+  }
+}
+</style>
