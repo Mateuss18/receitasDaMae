@@ -1,6 +1,13 @@
 <template>
   <q-card v-if="recipe" class="recipe-card">
-    <img src="https://cdn.quasar.dev/img/mountains.jpg" height="170" width="400" />
+    <q-img
+      v-if="recipe.image"
+      :src="recipe.image"
+      spinner-color="primary"
+      height="175"
+      width="400"
+      class="recipe-card__image"
+    />
 
     <div class="recipe-card__text">
       <q-card-section v-if="recipe?.name" class="recipe-card__title">
@@ -38,12 +45,12 @@ defineProps({
     0 2px 2px rgba(34, 34, 34, 0.14),
     0 3px 1px -2px rgba(39, 39, 39, 0.12);
 
-  img {
-    object-fit: cover;
-    max-width: 100%;
+  &__image {
     border-top: 0;
     border-top-left-radius: inherit;
     border-top-right-radius: inherit;
+    height: 175px;
+    width: 100%;
   }
 
   &__text {

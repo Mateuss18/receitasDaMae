@@ -1,5 +1,5 @@
 <template>
-  <div class="recipe-detail" v-if="selectedRecipe">
+  <div class="recipe-detail__body" v-if="selectedRecipe">
     <Teleport to="#header-actions-portal">
       <q-btn flat round dense icon="more_vert" class="absolute-right">
         <q-menu>
@@ -29,40 +29,51 @@
       </q-card>
     </q-dialog>
 
-    <!-- <p>id: {{ selectedRecipe.id }}</p> -->
-    <h2 class="recipe-detail__title">{{ selectedRecipe.name }}</h2>
+    <q-img
+      v-if="selectedRecipe.image"
+      :src="selectedRecipe.image"
+      spinner-color="primary"
+      height="170"
+      width="400"
+      class="recipe-detail__image"
+      :alt="`Imagem da receita ${selectedRecipe.name}`"
+    />
 
-    <div class="recipe-detail__description">
-      <p class="recipe-detail__description-text">{{ selectedRecipe.description }}</p>
-    </div>
+    <div class="recipe-detail">
+      <h2 class="recipe-detail__title">{{ selectedRecipe.name }}</h2>
 
-    <q-separator class="q-my-md" />
+      <div class="recipe-detail__description">
+        <p class="recipe-detail__description-text">{{ selectedRecipe.description }}</p>
+      </div>
 
-    <div class="recipe-detail__duration">
-      <h3 class="recipe-detail__duration-title">Duração</h3>
-      <p class="recipe-detail__duration-value">{{ selectedRecipe.duration }} minutos</p>
-    </div>
+      <q-separator class="q-my-md" />
 
-    <q-separator class="q-my-md" />
+      <div class="recipe-detail__duration">
+        <h3 class="recipe-detail__duration-title">Duração</h3>
+        <p class="recipe-detail__duration-value">{{ selectedRecipe.duration }} minutos</p>
+      </div>
 
-    <div class="recipe-detail__ingredients">
-      <h3 class="recipe-detail__ingredients-title">Ingredientes</h3>
-      <ul class="recipe-detail__ingredients-list">
-        <q-chip
-          v-for="(ingredient, index) in selectedRecipe.ingredients"
-          :key="index"
-          class="recipe-detail__ingredients-item"
-        >
-          {{ ingredient }}
-        </q-chip>
-      </ul>
-    </div>
+      <q-separator class="q-my-md" />
 
-    <q-separator class="q-my-md" />
+      <div class="recipe-detail__ingredients">
+        <h3 class="recipe-detail__ingredients-title">Ingredientes</h3>
+        <ul class="recipe-detail__ingredients-list">
+          <q-chip
+            v-for="(ingredient, index) in selectedRecipe.ingredients"
+            :key="index"
+            class="recipe-detail__ingredients-item"
+          >
+            {{ ingredient }}
+          </q-chip>
+        </ul>
+      </div>
 
-    <div class="recipe-detail__preparation">
-      <h3 class="recipe-detail__preparation-title">Modo de preparo</h3>
-      <p class="recipe-detail__preparation-text">{{ selectedRecipe.preparationMethod }}</p>
+      <q-separator class="q-my-md" />
+
+      <div class="recipe-detail__preparation">
+        <h3 class="recipe-detail__preparation-title">Modo de preparo</h3>
+        <p class="recipe-detail__preparation-text">{{ selectedRecipe.preparationMethod }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -104,6 +115,11 @@ const selectedRecipe = computed(() => {
 <style scoped lang="scss">
 .recipe-detail {
   padding: 20px;
+
+  &__image {
+    height: 170px;
+    width: 100%;
+  }
 
   &__title {
     font-weight: 600;
