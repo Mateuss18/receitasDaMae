@@ -6,26 +6,39 @@
       </h2>
 
       <div class="form-recipe__label">
-        <label for="nome">Nome da receita</label>
-        <input
-          v-model="form.name"
-          type="text"
-          name="nome"
-          id="nome"
-          placeholder="Adicione o nome da receita"
+        <q-input outlined v-model="form.name" label="Nome da Receita" :dense="dense" required />
+      </div>
+
+      <div class="form-recipe__label">
+        <q-input
+          outlined
+          v-model="form.description"
+          label="Descrição da Receita"
+          :dense="dense"
           required
         />
       </div>
 
       <div class="form-recipe__label">
-        <label for="descricao">Descrição</label>
-        <input
-          v-model="form.description"
-          type="text"
-          name="descricao"
-          id="descricao"
-          placeholder="Fale um pouco sobre a receita"
+        <q-file
+          outlined
+          v-model="rawImage"
+          @update:model-value="convertImageToBase64"
+          label="Adicione uma imagem a Receita"
+          accept=".jpg, image/*"
           required
+        >
+          <template v-slot:prepend>
+            <q-icon name="attach_file" />
+          </template>
+        </q-file>
+
+        <q-img
+          v-if="form.image"
+          :src="form.image"
+          spinner-color="primary"
+          class="form-recipe__image"
+          height="170"
         />
       </div>
 
@@ -35,20 +48,19 @@
       </div>
 
       <div class="form-recipe__label">
-        <label for="ingredints">Ingredientes</label>
         <div
           v-for="(ingredint, index) in form.ingredients"
           :key="index"
           class="form-recipe__ingredient-group"
         >
-          <input
+          <q-input
+            outlined
             v-model="form.ingredients[index]"
-            type="text"
-            name="ingredints"
-            id="ingredints"
-            :placeholder="`Ingrediente ${index + 1}`"
+            :label="`Ingrediente ${index + 1}`"
+            :dense="dense"
             required
           />
+
           <q-btn
             :disabled="form.ingredients.length <= 1"
             @click="removeIngredient(index)"
@@ -58,7 +70,6 @@
             round
           />
         </div>
-        <!-- <button type="button" @click="addIngredient">+ Adicionar ingrediente</button> -->
 
         <q-btn
           class="form-recipe__btn-add-ingredient"
@@ -71,13 +82,12 @@
       </div>
 
       <div class="form-recipe__label">
-        <label for="preparation">Modo de preparo</label>
-        <textarea
+        <q-input
+          outlined
           v-model="form.preparationMethod"
-          type="text"
-          name="preparation"
-          id="preparation"
-          placeholder="Descreva o modo de preparo"
+          label="Modo de preparo"
+          :dense="dense"
+          type="textarea"
           required
         />
       </div>
@@ -117,10 +127,28 @@ const { title, recipeValues, mode } = defineProps({
 const form = ref({
   name: recipeValues?.name ?? '',
   description: recipeValues?.description ?? '',
+  image: recipeValues?.image ?? '',
   duration: Number.isFinite(recipeValues?.duration) ? recipeValues.duration : 0,
   ingredients: Array.isArray(recipeValues?.ingredients) ? [...recipeValues.ingredients] : [''],
   preparationMethod: recipeValues?.preparationMethod ?? '',
 })
+
+const rawImage = ref(null)
+
+const convertImageToBase64 = (rawImage) => {
+  if (!rawImage) {
+    form.value.image = ''
+    return
+  }
+
+  const reader = new FileReader()
+
+  reader.onload = (event) => {
+    form.value.image = event.target.result
+  }
+
+  reader.readAsDataURL(rawImage)
+}
 
 const addIngredient = () => {
   form.value.ingredients.push('')
@@ -184,6 +212,11 @@ watch(
       border: 1px solid #838383;
     }
   }
+  &__image {
+    width: 100%;
+    height: 170px;
+    border-radius: 6px;
+  }
   .duration-group {
     .q-slider {
       padding: 26px 6px 0 6px;
@@ -193,6 +226,11 @@ watch(
     display: flex;
     gap: 10px;
     margin-bottom: 12px;
+
+    input,
+    label {
+      width: 100%;
+    }
   }
   &__btn-add-ingredient {
     width: 100%;
