@@ -1,11 +1,10 @@
 <template>
   <div class="home-page" v-if="dataRecipes.length > 0">
-    <nav class="q-px-md q-pb-sm">
+    <nav class="q-pb-md">
       <q-input
         outlined
         v-model="searchTerm"
         class="home-page__search"
-        :dense="dense"
         placeholder="Busque suas receitas.."
       >
         <template v-slot:prepend>
@@ -91,15 +90,10 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .home-page {
-  padding-bottom: 80px;
+  padding: 16px 20px 105px 20px;
 
   &__search {
-    margin-top: 16px;
     font-size: 18px;
-  }
-
-  &__content {
-    padding: 16px 20px;
   }
 
   &__nav {

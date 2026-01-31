@@ -6,17 +6,11 @@
       </h2>
 
       <div class="form-recipe__label">
-        <q-input outlined v-model="form.name" label="Nome da Receita" :dense="dense" required />
+        <q-input outlined v-model="form.name" label="Nome da Receita" required />
       </div>
 
       <div class="form-recipe__label">
-        <q-input
-          outlined
-          v-model="form.description"
-          label="Descrição da Receita"
-          :dense="dense"
-          required
-        />
+        <q-input outlined v-model="form.description" label="Descrição da Receita" required />
       </div>
 
       <div class="form-recipe__label">
@@ -26,7 +20,6 @@
           @update:model-value="convertImageToBase64"
           label="Adicione uma imagem a Receita"
           accept=".jpg, image/*"
-          required
         >
           <template v-slot:prepend>
             <q-icon name="attach_file" />
@@ -57,7 +50,6 @@
             outlined
             v-model="form.ingredients[index]"
             :label="`Ingrediente ${index + 1}`"
-            :dense="dense"
             required
           />
 
@@ -86,7 +78,6 @@
           outlined
           v-model="form.preparationMethod"
           label="Modo de preparo"
-          :dense="dense"
           type="textarea"
           required
         />
@@ -103,11 +94,12 @@
 <script setup>
 import { ref, watch } from 'vue'
 
+import { useQuasar } from 'quasar'
 import { useGoBack } from 'src/composables/useGoBack'
 
 const { goBack } = useGoBack()
+const $q = useQuasar()
 
-// eslint-disable-next-line no-unused-vars
 const { title, recipeValues, mode } = defineProps({
   title: {
     type: String,
@@ -166,6 +158,12 @@ function onSubmit() {
     emit('submit', form.value)
 
     goBack()
+
+    if (mode == 'create') {
+      triggerPositive('Receita criada com sucesso')
+    } else {
+      triggerPositive('Receita editada com sucesso')
+    }
   }
 }
 
@@ -180,6 +178,13 @@ const validateRecipeForm = () => {
   } else {
     return false
   }
+}
+
+const triggerPositive = (notifyMessage) => {
+  $q.notify({
+    type: 'positive',
+    message: notifyMessage,
+  })
 }
 
 watch(

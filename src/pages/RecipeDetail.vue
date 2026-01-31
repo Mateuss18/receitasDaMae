@@ -81,12 +81,14 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { getAll, saveAll } from '../services/recipesStorage'
 
-const dataRecipes = ref([])
+const $q = useQuasar()
 const route = useRoute()
 const router = useRouter()
 
+const dataRecipes = ref([])
 const confirm = ref(false)
 
 const recipeId = String(route.params.id)
@@ -101,6 +103,15 @@ const deleteRecipe = () => {
   saveAll(newDataRecipes)
 
   router.push('/')
+
+  triggerPositive('Receita deletada com sucesso')
+}
+
+const triggerPositive = (notifyMessage) => {
+  $q.notify({
+    type: 'positive',
+    message: notifyMessage,
+  })
 }
 
 onMounted(() => {
