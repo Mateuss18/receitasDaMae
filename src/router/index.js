@@ -1,6 +1,7 @@
 import { defineRouter } from '#q-app/wrappers'
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
 import routes from './routes'
+import { auth } from 'src/boot/firebase'
 
 /*
  * If not building with SSR mode, you can
@@ -24,6 +25,25 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE)
+  })
+
+  const getCurrentUser = () => {
+    return new Promise((resolve, reject) => {
+      const unsubscribe = auth.onAuthStateChanged(user => {
+        unsubscribe()
+        resolve(user)
+      }, reject)
+    })
+  }
+
+  Router.beforeEach(async (to, from, next) => {
+    const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+
+    if (requiresAuth && !(await getCurrentUser())) {
+      next('/login')
+    } else {
+      next()
+    }
   })
 
   return Router
