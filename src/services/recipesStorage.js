@@ -1,29 +1,76 @@
-const RECIPES_KEY = 'recipes'
+import { db, auth } from 'src/boot/firebase'
+import {
+  collection,
+  getDocs,
+  addDoc,
+  doc,
+  updateDoc,
+  deleteDoc,
+  query
+} from 'firebase/firestore'
 
-export function getAll() {
-  const recipesData = localStorage.getItem(RECIPES_KEY)
-  if (!recipesData) return []
+const getUserRecipesCollection = () => {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  return collection(db, 'users', user.uid, 'recipes')
+}
 
+export async function getAll() {
   try {
-    const recipesDataParsed = JSON.parse(recipesData)
-    return Array.isArray(recipesDataParsed) ? recipesDataParsed : []
-  }
-  catch (error) {
-    console.error('Error trying to read recipes from local storage: ', error)
+    const q = query(getUserRecipesCollection())
+    const querySnapshot = await getDocs(q)
+    return querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    }))
+  } catch (error) {
+    console.error('Erro ao buscar receitas:', error)
     return []
   }
 }
 
-export function saveAll(recipes) {
-  if (!Array.isArray(recipes)) return false
-
+export async function createRecipe(recipe) {
   try {
-    localStorage.setItem('recipes', JSON.stringify(recipes))
+    const colRef = getUserRecipesCollection()
+    const docRef = await addDoc(colRef, recipe)
+    return docRef.id
+  } catch (error) {
+    console.error('Error ao criar receita:'.error)
+    throw error
+  }
+}
 
+export async function updateRecipe(id, recipe) {
+  try {
+    const user = auth.currentUser
+    if (!user) throw new Error('Usuário não autenticado')
+
+    const docRef = doc(db, 'users', user.uid, 'recipes', id)
+    // eslint-disable-next-line no-unused-vars
+    const { id: _, ...recipeData } = recipe
+    await updateDoc(docRef, recipeData)
     return true
+  } catch (error) {
+    console.error('Erro ao atualizar receita:', error)
+    throw error
   }
-  catch (error) {
-    console.error('Error trying to save recipes on local storage: ', error)
-    return false
+}
+
+export async function deleteRecipe(id) {
+  try {
+    const user = auth.currentUser
+    if (!user) throw new Error('Usuário não autenciado')
+
+    const docRef = doc(db, 'users', user.uid, 'recipes', id)
+    await deleteDoc(docRef)
+    return true
+  } catch (error) {
+    console.error('Erro ao deletar receita:', error)
+    throw error
   }
+}
+
+export function saveAll() {
+  console.warn('SaveAll foi depreciado')
+  return false
 }
