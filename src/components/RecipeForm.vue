@@ -94,24 +94,18 @@
 <script setup>
 import { ref, watch } from 'vue'
 
-import { useQuasar } from 'quasar'
 import { useGoBack } from 'src/composables/useGoBack'
-
 const { goBack } = useGoBack()
-const $q = useQuasar()
+const rawImage = ref(null)
+const emit = defineEmits(['submit'])
 
-const { title, recipeValues, mode } = defineProps({
+const { title, recipeValues } = defineProps({
   title: {
     type: String,
     required: true,
   },
   recipeValues: {
     type: Object,
-    required: true,
-  },
-  mode: {
-    type: String,
-    default: 'create',
     required: true,
   },
 })
@@ -124,8 +118,6 @@ const form = ref({
   ingredients: Array.isArray(recipeValues?.ingredients) ? [...recipeValues.ingredients] : [''],
   preparationMethod: recipeValues?.preparationMethod ?? '',
 })
-
-const rawImage = ref(null)
 
 const convertImageToBase64 = (rawImage) => {
   if (!rawImage) {
@@ -151,19 +143,11 @@ const removeIngredient = (index) => {
   form.value.ingredients.splice(index, 1)
 }
 
-const emit = defineEmits(['submit'])
-
 function onSubmit() {
   if (validateRecipeForm()) {
     emit('submit', form.value)
 
     goBack()
-
-    if (mode == 'create') {
-      triggerPositive('Receita criada com sucesso')
-    } else {
-      triggerPositive('Receita editada com sucesso')
-    }
   }
 }
 
@@ -178,13 +162,6 @@ const validateRecipeForm = () => {
   } else {
     return false
   }
-}
-
-const triggerPositive = (notifyMessage) => {
-  $q.notify({
-    type: 'positive',
-    message: notifyMessage,
-  })
 }
 
 watch(
