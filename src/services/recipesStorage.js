@@ -2,6 +2,7 @@ import { db, auth } from 'src/boot/firebase'
 import {
   collection,
   getDocs,
+  getDoc,
   addDoc,
   doc,
   updateDoc,
@@ -40,6 +41,27 @@ export async function createRecipe(recipe) {
   }
 }
 
+export async function getRecipeById(id) {
+  try {
+    const user = auth.currentUser
+    if (!user) throw new Error('Usuário não autenticado')
+
+    const docRef = doc(db, 'users', user.uid, 'recipes', id)
+    const docSnap = await getDoc(docRef)
+
+    if (!docSnap.exists()) {
+      return null
+    }
+
+    const data = docSnap.data()
+    const recipe = { id: docSnap.id, ...data }
+    return recipe
+  } catch (error) {
+    console.error('Erro ao carregar receita:', error)
+    throw error
+  }
+}
+
 export async function updateRecipe(id, recipe) {
   try {
     const user = auth.currentUser
@@ -59,7 +81,7 @@ export async function updateRecipe(id, recipe) {
 export async function deleteRecipe(id) {
   try {
     const user = auth.currentUser
-    if (!user) throw new Error('Usuário não autenciado')
+    if (!user) throw new Error('Usuário não autenticado')
 
     const docRef = doc(db, 'users', user.uid, 'recipes', id)
     await deleteDoc(docRef)
