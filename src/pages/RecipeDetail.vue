@@ -1,5 +1,5 @@
 <template>
-  <div class="recipe-detail__body" v-if="selectedRecipe">
+  <div class="recipe-detail__body" v-if="recipeSelected">
     <Teleport to="#header-actions-portal">
       <q-btn flat round dense icon="more_vert" class="absolute-right">
         <q-menu>
@@ -24,33 +24,33 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Não" color="primary" v-close-popup />
-          <q-btn flat label="Sim" color="primary" v-close-popup @click="deleteRecipe" />
+          <q-btn flat label="Sim" color="primary" v-close-popup @click="handleDeleteRecipe" />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
     <q-img
-      v-if="selectedRecipe.image"
-      :src="selectedRecipe.image"
+      v-if="recipeSelected.image"
+      :src="recipeSelected.image"
       spinner-color="primary"
       height="170"
       width="400"
       class="recipe-detail__image"
-      :alt="`Imagem da receita ${selectedRecipe.name}`"
+      :alt="`Imagem da receita ${recipeSelected.name}`"
     />
 
     <div class="recipe-detail">
-      <h2 class="recipe-detail__title">{{ selectedRecipe.name }}</h2>
+      <h2 class="recipe-detail__title">{{ recipeSelected.name }}</h2>
 
       <div class="recipe-detail__description">
-        <p class="recipe-detail__description-text">{{ selectedRecipe.description }}</p>
+        <p class="recipe-detail__description-text">{{ recipeSelected.description }}</p>
       </div>
 
       <q-separator class="q-my-md" />
 
       <div class="recipe-detail__duration">
         <h3 class="recipe-detail__duration-title">Duração</h3>
-        <p class="recipe-detail__duration-value">{{ selectedRecipe.duration }} minutos</p>
+        <p class="recipe-detail__duration-value">{{ recipeSelected.duration }} minutos</p>
       </div>
 
       <q-separator class="q-my-md" />
@@ -59,7 +59,7 @@
         <h3 class="recipe-detail__ingredients-title">Ingredientes</h3>
         <ul class="recipe-detail__ingredients-list">
           <q-chip
-            v-for="(ingredient, index) in selectedRecipe.ingredients"
+            v-for="(ingredient, index) in recipeSelected.ingredients"
             :key="index"
             class="recipe-detail__ingredients-item"
           >
@@ -72,35 +72,32 @@
 
       <div class="recipe-detail__preparation">
         <h3 class="recipe-detail__preparation-title">Modo de preparo</h3>
-        <p class="recipe-detail__preparation-text">{{ selectedRecipe.preparationMethod }}</p>
+        <p class="recipe-detail__preparation-text">{{ recipeSelected.preparationMethod }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { getAll, saveAll } from '../services/recipesStorage'
+import { deleteRecipe, getRecipeById } from '../services/recipesStorage'
 
 const $q = useQuasar()
 const route = useRoute()
 const router = useRouter()
 
-const dataRecipes = ref([])
 const confirm = ref(false)
-
 const recipeId = String(route.params.id)
+const recipeSelected = ref(null)
 
 const goToUpdate = () => {
   router.push(`/update-recipe/${recipeId}`)
 }
 
-const deleteRecipe = () => {
-  const newDataRecipes = dataRecipes.value.filter((recipe) => recipe.id !== recipeId)
-
-  saveAll(newDataRecipes)
+const handleDeleteRecipe = async () => {
+  await deleteRecipe(recipeId)
 
   router.push('/')
 
@@ -114,12 +111,8 @@ const triggerPositive = (notifyMessage) => {
   })
 }
 
-onMounted(() => {
-  dataRecipes.value = getAll()
-})
-
-const selectedRecipe = computed(() => {
-  return dataRecipes.value.find((recipeItem) => recipeItem.id === recipeId)
+onMounted(async () => {
+  recipeSelected.value = await getRecipeById(recipeId)
 })
 </script>
 
