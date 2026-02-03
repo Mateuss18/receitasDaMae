@@ -83,8 +83,8 @@ const openRecipe = (id) => {
   router.push({ name: 'detail', params: { id } })
 }
 
-onMounted(() => {
-  dataRecipes.value = getAll()
+onMounted(async () => {
+  dataRecipes.value = await getAll()
 })
 </script>
 
