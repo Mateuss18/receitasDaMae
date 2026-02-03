@@ -1,44 +1,32 @@
 <template>
-  <div v-if="selectedRecipe">
-    <RecipeForm
-      title="Editar receita"
-      :recipe-values="selectedRecipe"
-      mode="update"
-      @submit="handleSubmitUpdate"
-    />
+  <div v-if="recipe">
+    <RecipeForm title="Editar receita" :recipe-values="recipe" @submit="handleSubmitUpdate" />
   </div>
   <div v-else>Receita não existe</div>
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue'
-
-import { useRoute, useRouter } from 'vue-router'
-
-import { getAll, saveAll } from '../services/recipesStorage'
-
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { getRecipeById, updateRecipe } from '../services/recipesStorage'
 import RecipeForm from 'src/components/RecipeForm.vue'
 
-const dataRecipes = ref([])
-const router = useRouter()
 const route = useRoute()
+const $q = useQuasar()
+
+const recipe = ref(null)
 const recipeToUpdateID = String(route.params.id)
 
-onMounted(() => {
-  dataRecipes.value = getAll()
-})
-
-const selectedRecipe = computed(() => {
-  return dataRecipes.value.find((recipeItem) => recipeItem.id === recipeToUpdateID)
-})
-
-function handleSubmitUpdate(payload) {
-  const idToUpdateIndex = dataRecipes.value.findIndex(
-    (recipeItem) => recipeItem.id === recipeToUpdateID,
-  )
-  dataRecipes.value[idToUpdateIndex] = { id: recipeToUpdateID, ...payload }
-  saveAll(dataRecipes.value)
-
-  router.replace('/')
+const handleSubmitUpdate = async (updatedRecipe) => {
+  await updateRecipe(recipeToUpdateID, updatedRecipe)
+  $q.notify({
+    type: 'positive',
+    message: 'Receita editada com sucesso',
+  })
 }
+
+onMounted(async () => {
+  recipe.value = await getRecipeById(recipeToUpdateID)
+})
 </script>
