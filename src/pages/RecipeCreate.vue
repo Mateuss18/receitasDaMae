@@ -3,7 +3,6 @@
     <RecipeForm
       title="Criar Receita"
       :recipe-values="recipe"
-      mode="create"
       @submit="handleCreateRecipe"
     />
   </div>
@@ -12,10 +11,12 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { createRecipe } from '../services/recipesStorage'
 import RecipeForm from 'src/components/RecipeForm.vue'
 
 const router = useRouter()
+const $q = useQuasar()
 
 const recipe = ref({
   name: '',
@@ -27,6 +28,10 @@ const recipe = ref({
 
 const handleCreateRecipe = async (payload) => {
   await createRecipe(payload)
+  $q.notify({
+    type: 'positive',
+    message: 'Receita criada com sucesso',
+  })
   router.replace('/')
 }
 </script>
