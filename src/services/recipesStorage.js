@@ -12,20 +12,36 @@ import {
 
 const getCurrentUser = () => {
   const user = auth.currentUser
-  if (!user) throw new Error('Usuário não autenticado')
+  if (user) return Promise.resolve(user)
 
-  return user
+  return new Promise((resolve, reject) => {
+    const unsubscribe = auth.onAuthStateChanged(
+      (authUser) => {
+        unsubscribe()
+        if (!authUser) {
+          reject(new Error('Usuário não autenticado'))
+          return
+        }
+        resolve(authUser)
+      },
+      (error) => {
+        unsubscribe()
+        reject(error)
+      }
+    )
+  })
 }
 
-const getUserRecipesCollection = () => {
-  const user = getCurrentUser()
+const getUserRecipesCollection = async () => {
+  const user = await getCurrentUser()
 
   return collection(db, 'users', user.uid, 'recipes')
 }
 
 export async function getAll() {
   try {
-    const q = query(getUserRecipesCollection())
+    const colRef = await getUserRecipesCollection()
+    const q = query(colRef)
     const querySnapshot = await getDocs(q)
 
     return querySnapshot.docs.map((doc) => ({
@@ -40,7 +56,7 @@ export async function getAll() {
 
 export async function createRecipe(recipe) {
   try {
-    const colRef = getUserRecipesCollection()
+    const colRef = await getUserRecipesCollection()
     const docRef = await addDoc(colRef, recipe)
 
     return docRef.id
@@ -52,7 +68,7 @@ export async function createRecipe(recipe) {
 
 export async function getRecipeById(id) {
   try {
-    const user = getCurrentUser()
+    const user = await getCurrentUser()
     const docRef = doc(db, 'users', user.uid, 'recipes', id)
     const docSnap = await getDoc(docRef)
 
@@ -72,7 +88,7 @@ export async function getRecipeById(id) {
 
 export async function updateRecipe(id, recipe) {
   try {
-    const user = getCurrentUser()
+    const user = await getCurrentUser()
     const docRef = doc(db, 'users', user.uid, 'recipes', id)
     // eslint-disable-next-line no-unused-vars
     const { id: _, ...recipeData } = recipe
@@ -87,7 +103,7 @@ export async function updateRecipe(id, recipe) {
 
 export async function deleteRecipe(id) {
   try {
-    const user = getCurrentUser()
+    const user = await getCurrentUser()
     const docRef = doc(db, 'users', user.uid, 'recipes', id)
     await deleteDoc(docRef)
 

@@ -19,7 +19,8 @@
 
 <script setup>
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
-import { auth } from 'src/boot/firebase'
+import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
+import { auth, db } from 'src/boot/firebase'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
@@ -29,7 +30,27 @@ const $q = useQuasar()
 const loginWithGoogle = async () => {
   try {
     const provider = new GoogleAuthProvider()
-    await signInWithPopup(auth, provider)
+    const credential = await signInWithPopup(auth, provider)
+    const user = credential.user
+
+    const userRef = doc(db, 'users', user.uid)
+    const userSnap = await getDoc(userRef)
+    const identifier = user.displayName || user.email
+
+    const userData = {
+      uid: user.uid,
+      displayName: user.displayName ?? '',
+      email: user.email ?? '',
+      photoURL: user.photoURL ?? '',
+      identifier,
+      lastLoginAt: serverTimestamp(),
+    }
+
+    if (!userSnap.exists()) {
+      userData.createdAt = serverTimestamp()
+    }
+
+    await setDoc(userRef, userData, { merge: true })
 
     $q.notify({
       type: 'positive',
