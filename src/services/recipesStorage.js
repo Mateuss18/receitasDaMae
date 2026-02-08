@@ -9,6 +9,13 @@ import {
   deleteDoc,
   query
 } from 'firebase/firestore'
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject
+} from 'firebase/storage'
 
 const getCurrentUser = () => {
   const user = auth.currentUser
@@ -30,6 +37,51 @@ const getCurrentUser = () => {
       }
     )
   })
+}
+
+const compressImage = async (file, { maxWidth = 600, maxSizeMB = 1 } = {}) => {
+  const imageBitmap = await createImageBitmap(file)
+
+  const ratio = imageBitmap.width > maxWidth ? maxWidth / imageBitmap.width : 1
+  const width = Math.round(imageBitmap.width * ratio)
+  const height = Math.round(imageBitmap.height * ratio)
+
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+
+  const ctx = canvas.getContext('2d')
+  ctx.drawImage(imageBitmap, 0, 0, width, height)
+
+  let quality = 0.8
+  let blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', quality))
+
+  const maxBytes = maxSizeMB * 1024 * 1024
+
+  while (blob && blob.size > maxBytes && quality > 0.4) {
+    quality -= 0.1
+    blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', quality))
+  }
+
+  if (!blob) throw new Error('Falha ao comprimir imagem')
+
+  return new File([blob], file.name.replace(/\.\w+$/, '.webp'), { type: 'image/webp' })
+}
+
+const uploadRecipeImage = async (userId, file) => {
+  const storage = getStorage()
+  const fileName = `${crypto.randomUUID()}.webp`
+  const path = `users/${userId}/recipes/${fileName}`
+  const imgRef = storageRef(storage, path)
+
+  await uploadBytes(imgRef, file)
+  return await getDownloadURL(imgRef)
+}
+
+const deleteRecipeImageByUrl = async (imageUrl) => {
+  const storage = getStorage()
+  const imgRef = storageRef(storage, imageUrl)
+  await deleteObject(imgRef)
 }
 
 const getUserRecipesCollection = async () => {
@@ -57,8 +109,17 @@ export async function getAll() {
 export async function createRecipe(recipe) {
   try {
     const colRef = await getUserRecipesCollection()
-    const docRef = await addDoc(colRef, recipe)
+    const user = await getCurrentUser()
 
+    const { imageFile, ...recipeData } = recipe
+
+    if (imageFile) {
+      const compressed = await compressImage(imageFile, { maxWidth: 600, maxSizeMB: 1 })
+      const imageUrl = await uploadRecipeImage(user.uid, compressed)
+      recipeData.imageUrl = imageUrl
+    }
+
+    const docRef = await addDoc(colRef, recipeData)
     return docRef.id
   } catch (error) {
     console.error('Error ao criar receita:', error)
@@ -90,10 +151,20 @@ export async function updateRecipe(id, recipe) {
   try {
     const user = await getCurrentUser()
     const docRef = doc(db, 'users', user.uid, 'recipes', id)
-    // eslint-disable-next-line no-unused-vars
-    const { id: _, ...recipeData } = recipe
-    await updateDoc(docRef, recipeData)
 
+    // eslint-disable-next-line no-unused-vars
+    const { id: _, imageFile, ...recipeData } = recipe
+
+    if (imageFile) {
+      if (recipeData.imageUrl) {
+        await deleteRecipeImageByUrl(recipeData.imageUrl)
+      }
+      const compressed = await compressImage(imageFile, { maxWidth: 600, maxSizeMB: 1 })
+      const imageUrl = await uploadRecipeImage(user.uid, compressed)
+      recipeData.imageUrl = imageUrl
+    }
+
+    await updateDoc(docRef, recipeData)
     return true
   } catch (error) {
     console.error('Erro ao atualizar receita:', error)
@@ -105,6 +176,11 @@ export async function deleteRecipe(id) {
   try {
     const user = await getCurrentUser()
     const docRef = doc(db, 'users', user.uid, 'recipes', id)
+    const docSnap = await getDoc(docRef)
+    if (docSnap.exists()) {
+      const data = docSnap.data()
+      if (data.imageUrl) await deleteRecipeImageByUrl(data.imageUrl)
+    }
     await deleteDoc(docRef)
 
     return true
