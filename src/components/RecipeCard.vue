@@ -1,8 +1,9 @@
 <template>
   <q-card v-if="recipe" class="recipe-card">
     <q-img
-      v-if="recipe.image"
-      :src="recipe.image"
+      v-if="recipe.imageUrl"
+      :src="recipe.imageUrl"
+      loading="lazy"
       spinner-color="primary"
       height="175"
       width="400"

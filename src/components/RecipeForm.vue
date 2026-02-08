@@ -16,8 +16,7 @@
       <div class="form-recipe__label">
         <q-file
           outlined
-          v-model="rawImage"
-          @update:model-value="convertImageToBase64"
+          v-model="form.imageFile"
           label="Adicione uma imagem a Receita"
           accept=".jpg, image/*"
         >
@@ -27,8 +26,8 @@
         </q-file>
 
         <q-img
-          v-if="form.image"
-          :src="form.image"
+          v-if="previewUrl || form.imageUrl"
+          :src="previewUrl || form.imageUrl"
           spinner-color="primary"
           class="form-recipe__image"
           height="170"
@@ -93,10 +92,10 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-
 import { useGoBack } from 'src/composables/useGoBack'
+
 const { goBack } = useGoBack()
-const rawImage = ref(null)
+
 const emit = defineEmits(['submit'])
 
 const { title, recipeValues } = defineProps({
@@ -113,26 +112,14 @@ const { title, recipeValues } = defineProps({
 const form = ref({
   name: recipeValues?.name ?? '',
   description: recipeValues?.description ?? '',
-  image: recipeValues?.image ?? '',
+  imageUrl: recipeValues?.imageUrl ?? '',
+  imageFile: null,
   duration: Number.isFinite(recipeValues?.duration) ? recipeValues.duration : 0,
   ingredients: Array.isArray(recipeValues?.ingredients) ? [...recipeValues.ingredients] : [''],
   preparationMethod: recipeValues?.preparationMethod ?? '',
 })
 
-const convertImageToBase64 = (rawImage) => {
-  if (!rawImage) {
-    form.value.image = ''
-    return
-  }
-
-  const reader = new FileReader()
-
-  reader.onload = (event) => {
-    form.value.image = event.target.result
-  }
-
-  reader.readAsDataURL(rawImage)
-}
+const previewUrl = ref('')
 
 const addIngredient = () => {
   form.value.ingredients.push('')
@@ -143,19 +130,11 @@ const removeIngredient = (index) => {
   form.value.ingredients.splice(index, 1)
 }
 
-function onSubmit() {
-  if (validateRecipeForm()) {
-    emit('submit', form.value)
-
-    goBack()
-  }
-}
-
 const validateRecipeForm = () => {
   if (
     form.value.name?.trim().length > 0 &&
     form.value.description?.trim().length > 0 &&
-    form.value.ingredients.some((ingredint) => ingredint.trim()) &&
+    form.value.ingredients.some((ingredient) => ingredient.trim()) &&
     form.value.preparationMethod?.trim().length > 0
   ) {
     return true
@@ -164,10 +143,37 @@ const validateRecipeForm = () => {
   }
 }
 
+function onSubmit() {
+  if (validateRecipeForm()) {
+    emit('submit', form.value)
+  }
+}
+
+watch(
+  () => form.value.imageFile,
+  (file) => {
+    if (previewUrl.value) {
+      URL.revokeObjectURL(previewUrl.value)
+      previewUrl.value = ''
+    }
+    if (file) previewUrl.value = URL.createObjectURL(file)
+  },
+)
+
 watch(
   () => recipeValues,
   (v) => {
-    form.value = { ...v, ingredients: [...(v.ingredients || [''])] }
+    form.value = {
+      ...v,
+      imageUrl: v?.imageUrl ?? '',
+      imageFile: null,
+      ingredients: [...(v.ingredients || [''])],
+    }
+
+    if (previewUrl.value) {
+      URL.revokeObjectURL(previewUrl.value)
+      previewUrl.value = ''
+    }
   },
   { deep: true },
 )

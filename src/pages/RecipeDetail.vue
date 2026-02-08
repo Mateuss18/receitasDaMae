@@ -30,8 +30,9 @@
     </q-dialog>
 
     <q-img
-      v-if="recipeSelected.image"
-      :src="recipeSelected.image"
+      v-if="recipeSelected.imageUrl"
+      :src="recipeSelected.imageUrl"
+      loading="lazy"
       spinner-color="primary"
       height="170"
       width="400"

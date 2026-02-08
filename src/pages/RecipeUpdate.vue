@@ -7,12 +7,13 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { getRecipeById, updateRecipe } from '../services/recipesStorage'
 import RecipeForm from 'src/components/RecipeForm.vue'
 
 const route = useRoute()
+const router = useRouter()
 const $q = useQuasar()
 
 const recipe = ref(null)
@@ -24,6 +25,7 @@ const handleSubmitUpdate = async (updatedRecipe) => {
     type: 'positive',
     message: 'Receita editada com sucesso',
   })
+  router.replace(`/recipe/${recipeToUpdateID}`)
 }
 
 onMounted(async () => {
