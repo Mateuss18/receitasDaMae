@@ -12,7 +12,7 @@
       />
 
       <router-link to="/" class="text-decoration-none text-white">
-        <h1 class="text-center text-weight-bold">Receitas da Mãe</h1>
+        <h1 class="text-center text-weight-bold">{{ $t('common.title') }}</h1>
       </router-link>
 
       <div id="header-actions-portal"></div>
