@@ -8,6 +8,7 @@
       height="175"
       width="400"
       class="recipe-card__image"
+      :alt="$t('common.imageAl', { name: recipe.name })"
     />
 
     <div class="recipe-card__text">
@@ -20,7 +21,7 @@
       </q-card-section>
 
       <q-card-section v-if="recipe?.duration" class="recipe-card__duration">
-        <q-icon name="access_time" /> <span>{{ recipe.duration }} minutos</span>
+        <q-icon name="access_time" /> <span>{{ recipe.duration }} {{ $t('common.minutes') }}</span>
       </q-card-section>
     </div>
   </q-card>

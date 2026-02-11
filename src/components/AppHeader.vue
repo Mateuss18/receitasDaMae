@@ -31,7 +31,7 @@ const { goBack } = useGoBack()
 <style scoped lang="scss">
 .app-header {
   background-color: $primary;
-  color: white;
+  color: #fff;
 }
 
 .header-top {
@@ -39,7 +39,7 @@ const { goBack } = useGoBack()
 }
 
 .button-back {
-  color: white;
+  color: #fff;
   z-index: 10;
 }
 
@@ -58,7 +58,7 @@ const { goBack } = useGoBack()
 
   &:focus {
     outline: none;
-    background: white;
+    background: #fff;
   }
 }
 </style>

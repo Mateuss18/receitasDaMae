@@ -15,9 +15,11 @@
 
     <div class="home-page__content">
       <div class="home-page__nav">
-        <h2 class="home-page__title">Todas as receitas</h2>
+        <h2 class="home-page__title">{{ $t('home.allRecipes') }}</h2>
 
-        <div class="home-page__recipes-count">{{ dataRecipes.length }} receitas</div>
+        <div class="home-page__recipes-count">
+          {{ dataRecipes.length }} {{ $t('common.recipes') }}
+        </div>
       </div>
 
       <div class="home-page__recipes">
